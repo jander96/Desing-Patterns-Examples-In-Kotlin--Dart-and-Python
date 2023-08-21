@@ -4,20 +4,21 @@ from abc import ABC, abstractmethod
     
 class Automovil:
     
-    def __init__(self,engine: str = "Standar", doors: int = 4, wheel: int = 4):
+    def __init__(self,engine: str = "Standar", doors: int = 4, wheel: int = 4, trailer = False):
         self.engine = engine
         self.doors = doors
         self.wheel = wheel
+        self.trailer = trailer
         
     def __str__(self) -> str:
-        return f"Automovil( engine = {self.engine}, doors = {self.doors}, wheel = {self.wheel} )"
+        return f"Automovil( engine = {self.engine}, doors = {self.doors}, wheel = {self.wheel} trailer = {self.trailer})"
 
 class Manual:
     def __init__(self, descriptions: list[str] = []):
         self.descriptions = descriptions
     
     def __str__(self) -> str:
-        return f"Manual = {self.descriptions} )"
+        return f"Manual ( descriptions = {self.descriptions} )"
 
 class Builder(ABC):
     @abstractmethod
@@ -35,6 +36,11 @@ class Builder(ABC):
     @abstractmethod
     def setEngine(self,engine: str):
         pass
+    
+    @abstractmethod
+    def addTrailer(self):
+        pass
+    
 
 
 class CarBuilder(Builder):
@@ -58,6 +64,9 @@ class CarBuilder(Builder):
         self.car.engine = engine
         return self
     
+    def addTrailer(self):
+        self.car.trailer = True
+        return self
 
     def build(self)-> Automovil:
         # Reset objet is optional when is build
@@ -69,7 +78,7 @@ class ManualBuilder(Builder):
     manual: Manual = Manual()
     
     def reset(self):
-        self.manual = Manual()
+        self.manual.descriptions = []
     
 
     def makeDoors(self,doors: int)-> Builder:
@@ -84,6 +93,10 @@ class ManualBuilder(Builder):
 
     def setEngine(self,engine: str)-> Builder:
         self.manual.descriptions.append(f"Car has {engine} engine")
+        return self
+    
+    def addTrailer(self):
+        self.manual.descriptions.append("Car has trailer")
         return self
     
 
@@ -103,7 +116,7 @@ class Director:
     
 
     def getTruckBuilder(self)->Builder:
-        return self.builder.setEngine("big").makeDoors(2).setWheels(8)
+        return self.builder.setEngine("big").makeDoors(2).setWheels(8).addTrailer()
 
 
     
@@ -122,8 +135,15 @@ def main():
 
     manualBuilder = ManualBuilder()
 
-    manual = (manualBuilder.setEngine("Deportive").makeDoors(2).setWheels(4)).build()
-    print(manual)
+    manual = manualBuilder.setEngine("Deportive").makeDoors(2).setWheels(4)
+    print(manual.build())
+    
+    manualBuilder.reset()
+    
+    
+    manualTruck = manualBuilder.setEngine("big").makeDoors(4).setWheels(8).addTrailer()
+    print(manualTruck.build())
+
 
 if __name__ == '__main__': 
     main()
